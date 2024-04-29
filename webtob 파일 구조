@@ -1,0 +1,284 @@
+WEBTOB란? 
+
+클라이언트의 요청을 처리하는 TMAX 웹서버 플랫폼
+
+
+
+WEBTOB 설정 파일 내용 
+
+'''
+*NODE
+
+#독루트는 소스가 있는 webcontent를 설정,기본 포트 80,제우스 통신포트 9900,핸들러3개(9900,9901,9902)
+
+testoutweb1         
+WEBTOBDIR="C:/TmaxSoft/WebtoB",
+SHMKEY = 54000,
+DOCROOT="D:/Workspace/Test/WebContent",
+PORT = "80",
+ServiceOrder = "ext,uri",
+JSVPORT=9900,
+HTH = 3,
+NODENAME = "$(NODENAME)",
+OGGING = "log1",
+ERRORLOG = "log2"
+
+'''
+
+'''
+#t1.test.com에서 HTTPS 프로토콜을 사용하기 위한 SSL 설정부분,기본443포트,
+
+*VHOST
+
+ssl1            
+
+NODENAME = "testoutweb1",
+
+DOCROOT="D:/Workspace/Test/WebContent",
+
+HOSTNAME = "t1.test.com",
+
+#HostAlias = "222.236.47.63",
+
+IndexName = "index.html",
+
+ServiceOrder = "ext,uri",
+
+PORT = "443",
+
+SSLFLAG = Y,
+
+SSLNAME = "ssl"
+
+#LOGGING="log_safe1",
+
+#ERRORLOG="log_safe2"
+
+ 
+
+#www.test.com을 사용하기 위한 기본 80포트 설정
+
+vh_safe         
+
+NODENAME = "testoutweb1",
+
+DOCROOT="D:/Workspace/Test2/WebContent",
+
+HOSTNAME = "www.test.com",
+
+#HostAlias = "www.sso1.com,www.sso2.com",
+
+IndexName = "index.html",
+
+ServiceOrder = "ext,uri",
+
+PORT = "80",
+
+LOGGING="log_safe1",
+
+ERRORLOG="log_safe2"
+
+ 
+
+#www.test.com에서 HTTPS 프로토콜을 사용하기 위한 SSL 설정부분,기본443포트
+
+vh_safe_ssl  
+
+NODENAME = "testoutweb1",
+
+DOCROOT="D:/Workspace/Test2/WebContent",
+
+HOSTNAME = "www.test.com",
+
+#HostAlias = "www.sso1.com,www.sso2.com",
+
+IndexName = "index.html",
+
+ServiceOrder = "ext,uri",
+
+PORT = "443",
+
+SSLFLAG = Y,
+
+SSLNAME = "ssl",
+
+LOGGING="log_safe1",
+
+ERRORLOG="log_safe2"
+
+ 
+
+#SSL 파일이 위치하는 경로설정
+
+*SSL
+
+ssl             
+
+CertificateFile = "C:/TmaxSoft/WebtoB/ssl/newreq.pem",
+
+CertificateKeyFile = "C:/TmaxSoft/WebtoB/ssl/newreq.pem",
+
+# CertificateChainFile = "C:/TmaxSoft/WebtoB/ssl/intermediate.pem",
+
+CACertificateFile = "C:/TmaxSoft/WebtoB/ssl/intermediate.pem",
+
+CACertificatePath = "C:/TmaxSoft/WebtoB/ssl"
+
+ 
+
+*SVRGROUP
+
+htmlg           NODENAME = "testoutweb1", SVRTYPE = HTML
+
+jsvg            NODENAME = "testoutweb1", SVRTYPE = JSV
+
+jsvg_safe       NODENAME = "testoutweb1", SVRTYPE = JSV,VHOSTNAME=vh_safe
+
+jsvg_safe2      NODENAME = "testoutweb1", SVRTYPE = JSV,VHOSTNAME=vh_safe_ssl
+
+ 
+
+ 
+
+*SERVER
+
+html            SVGNAME = htmlg, MinProc = 60, MaxProc = 100, ASQCount = 100
+
+MyGroup                    SVGNAME  = jsvg,  MinProc = 60,  MaxProc = 100, SvrChkTime=30
+
+MyGroup_safe    SVGNAME  = jsvg_safe,  MinProc = 60,  MaxProc = 100, SvrChkTime=30
+
+MyGroup_safe2   SVGNAME  = jsvg_safe2,  MinProc = 60,  MaxProc = 100, SvrChkTime=30
+
+'''
+
+'''
+#노드에서 설정된 EXT,URI순으로 읽어가게 되고, 디폴트로 index.html페이지가 아닌 것들은 이곳URI에 설정된 부분을 읽어가게 된다.
+
+*URI
+
+uri2        Uri      = "/controls", Svrtype = JSV
+
+uri3        Uri      = "/mdm", Svrtype = JSV
+
+ 
+
+#alias를 이용해서 z:/project~~/upload 폴더에 있는 이미지들을 바로 외부에서 접속가능하게 함
+
+*ALIAS
+
+alias1     URI = “/upload/” ,  RealPath=”Z:/project/Test/upload”
+
+ 
+
+#LOG 파일 떨궈주는 장소 지정
+
+*LOGGING
+
+log1 Format = "DEFAULT", FileName = "C:/TmaxSoft/WebtoB/log/biz/access.log_%M%%D%%Y%", Option = "sync"
+
+log2 Format = "ERROR", FileName = "C:/TmaxSoft/WebtoB/log/biz/error.log_%M%%D%%Y%", Option = "sync"
+
+ 
+
+log_safe1 Format = "DEFAULT", FileName = "C:/TmaxSoft/WebtoB/log/safe/access.log_%M%%D%%Y%", Option = "sync"
+
+log_safe2 Format = "ERROR", FileName = "C:/TmaxSoft/WebtoB/log/safe/error.log_%M%%D%%Y%",  Option = "sync"
+
+ 
+
+#EXT에는 웹투비에서 필요한 HTML,CSS,JS,IMAGE,SWF등의 정적인 부분만 읽도록 설정
+
+*EXT
+
+Htm     MimeType = "text/html", SvrType = HTML
+
+Html    MimeType = "text/html", SvrType = HTML
+
+hwp     MimeType = "application/x-hwp", SvrType = HTML
+
+pdf     MimeType = "application/x-pdf", SVRTYPE = HTML
+
+css     MimeType = "text/css", SvrType = HTML
+
+js      MimeType = "application/x-javascript", SvrType = HTML
+
+jsp     MimeType = "application/jsp", SvrType = JSV
+
+gul     MimeType = "application/gul", SvrType = HTML
+
+gif     MimeType = "image/gif", SvrType=HTML
+
+jpeg    MimeType = "image/gif", SvrType=HTML
+
+jpg     MimeType = "image/gif", SvrType=HTML
+
+zip     MimeType = "application/zip", SvrType=HTML
+
+jar     MimeType = "application/x-java-archive", SvrType=HTML
+
+exe     MimeType = "application/octet-stream", SvrType=HTML
+
+wml     MimeType = "application/vnd.wap.wml", SvrType=HTML
+
+wmls    MimeType = "application/vnd.wap.wmlscript", SvrType=HTML
+
+wmlc    MimeType = "application/vnd.wap.wmlc", SvrType=HTML
+
+wmlsc   MimeType = "application/vnd.wap.wmlscript", SvrType=HTML
+
+wbmp    MimeType = "application/vnd.wap.wbmp", SvrType=HTML
+
+swf     MimeType = "application/x-shockwave-flash", SvrType=HTML
+
+csv     MimeType = "application/octet-stream", SvrType=HTML
+
+xml     MimeType = "text/xml", SvrType = HTML
+
+asd     MimeType = "application/astound",SvrType=HTML
+
+asn     MimeType = "application/astound",SvrType=HTML
+
+doc     MimeType = "application/msword",SvrType=HTML
+
+wiz     MimeType = "application/msword",SvrType=HTML
+
+rtf     MimeType = "application/msword",SvrType=HTML
+
+xls     MimeType = "application/vnd.ms-excel",SvrType=HTML
+
+xlw     MimeType = "application/vnd.ms-excel",SvrType=HTML
+
+xla     MimeType = "application/vnd.ms-excel",SvrType=HTML
+
+xlc     MimeType = "application/vnd.ms-excel",SvrType=HTML
+
+xlm     MimeType = "application/vnd.ms-excel",SvrType=HTML
+
+xlt     MimeType = "application/vnd.ms-excel",SvrType=HTML
+
+ppt     MimeType = "application/vnd.ms-powerpoint",SvrType=HTML
+
+pps     MimeType = "application/vnd.ms-powerpoint",SvrType=HTML
+
+pot     MimeType = "application/vnd.ms-powerpoint",SvrType=HTML
+
+m13     MimeType = "application/x-msmediaview",SvrType=HTML
+
+m14     MimeType = "application/x-msmediaview",SvrType=HTML
+
+wmf     MimeType = "application/x-msmetafile",SvrType=HTML
+
+midi    MimeType = "audio/midi",SvrType=HTML
+
+mid     MimeType = "audio/midi",SvrType=HTML
+
+aif     MimeType = "audio/x-aiff",SvrType=HTML
+
+aiff    MimeType = "audio/x-aiff",SvrType=HTML
+
+aifc    MimeType = "audio/x-aiff",SvrType=HTML
+
+wav     MimeType = "audio/x-wav",SvrType=HTML
+
+cab     MimeType = "x-application/octet-stream", SvrType = HTML
